@@ -17,6 +17,45 @@
  * or modify functionality from its dependencies.
  */
 
-function localIntercept() {}
+function localIntercept(targets) {
+    const { Targetables } = require('@magento/pwa-buildpack');
+    const targetables = Targetables.using(targets);
+
+    const magentoPath = 'node_modules/@magento';
+
+    const globby = require('globby');
+    const fs = require('fs');
+    const path = require('path');
+
+    (async () => {
+        /** Load all CSS files from src/components */
+        const paths = await globby('src/components', {
+            expandDirectories: {
+                extensions: ['css']
+            }
+        });
+
+        paths.forEach(myPath => {
+            const relativePath = myPath.replace(
+                'src/components',
+                `${magentoPath}/venia-ui/lib/components`
+            );
+            const absolutePath = path.resolve(relativePath);
+
+            /** Identify if local component maps to venia-ui component */
+            fs.stat(absolutePath, (err, stat) => {
+                if (!err && stat && stat.isFile()) {
+                    /**
+                     * This means we have matched a local file to something in venia-ui!
+                     * Find the JS  component from our CSS file name
+                     * */
+                    const jsComponent = relativePath
+                        .replace('node_modules/', '')
+                        .replace('.css', '.js');
+                }
+            });
+        });
+    })();
+}
 
 module.exports = localIntercept;
