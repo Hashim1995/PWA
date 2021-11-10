@@ -2,7 +2,7 @@ const { configureWebpack, graphQL } = require('@magento/pwa-buildpack');
 const HTMLWebpackPlugin = require('html-webpack-plugin');
 const webpack = require('webpack');
 const fs = require('fs');
-
+const path = require('path');
 const {
     getMediaURL,
     getStoreConfigData,
@@ -56,6 +56,14 @@ module.exports = async env => {
         },
         env
     });
+
+    config.resolve = {
+        ...config.resolve,
+        alias: {
+            ...config.resolve.alias,
+            '@theme': path.resolve(__dirname, 'src')
+        }
+    };
 
     const mediaUrl = await getMediaURL();
     const storeConfigData = await getStoreConfigData();
